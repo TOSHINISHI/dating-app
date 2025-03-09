@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプルマッチングアプリ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #e8f4fc;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #c8e6f5;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a91d1;
+        }
+        
+        .app-container {
+            height: 80vh;
+            display: block;
+        }
+        
+        .profiles-container {
+            flex: 1;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            height: 70vh;
+            margin-bottom: 20px;
+        }
+        
+        .profile-card {
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            width: 100%;
+            transition: transform 0.3s;
+            background: white;
+            overflow: hidden;
+        }
+        
+        .profile-photo {
+            flex: 1;
+            background-color: #e0f0fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            color: #c8e6f5;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-height: 500px;
+            aspect-ratio: 1 / 1;
+        }
+        
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info {
+            padding: 15px 0;
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1a91d1;
+        }
+        
+        .profile-age, .profile-location, .profile-job {
+            color: #555;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .profile-age::before, .profile-location::before, .profile-job::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .profile-age::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a91d1'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z'/%3E%3C/svg%3E");
+        }
+        
+        .profile-location::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a91d1'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+        }
+        
+        .profile-job::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%231a91d1'%3E%3Cpath d='M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z'/%3E%3C/svg%3E");
+        }
+        
+        .profile-bio {
+            margin-top: 10px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            background-color: #f0f9ff;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #1a91d1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+        
+        .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .btn-dislike {
+            background-color: #fff;
+            color: #1a91d1;
+            border: 1px solid #1a91d1;
+        }
+        
+        .btn-like {
+            background-color: #1a91d1;
+            color: white;
+        }
+        
+        .messages-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            background-color: #1a91d1;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 3px 10px rgba(26, 145, 209, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: #0c7ab8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 145, 209, 0.4);
+        }
+        
+        .matches-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-to-profiles, .back-to-matches {
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .matches-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            list-style-type: none;
+        }
+        
+        .match-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .match-item:hover, .match-item.active {
+            background-color: #f8f8f8;
+        }
+        
+        .match-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #eee;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #aaa;
+            overflow: hidden;
+        }
+        
+        .match-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .match-name {
+            font-weight: bold;
+        }
+        
+        .chat-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 110;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-to-matches {
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+        }
+        
+        .message-received {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-sent {
+            background-color: #1a91d1;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 5px rgba(26, 145, 209, 0.2);
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #1a91d1;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(26, 145, 209, 0.3);
+        }
+        
+        .chat-input button:hover {
+            background-color: #0c7ab8;
+        }
+        
+        .match-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(26, 145, 209, 0.5);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            border: 2px solid #c8e6f5;
+        }
+        
+        .match-notification h2 {
+            color: #1a91d1;
+            margin-bottom: 20px;
+        }
+        
+        .notification-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .notification-buttons button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-message {
+            background-color: #1a91d1;
+            color: white;
+            box-shadow: 0 3px 10px rgba(26, 145, 209, 0.3);
+        }
+        
+        .btn-message:hover {
+            background-color: #0c7ab8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-continue {
+            background-color: #e8f4fc;
+            color: #1a91d1;
+            border: 1px solid #c8e6f5 !important;
+        }
+        
+        .btn-continue:hover {
+            background-color: #d0e9f7;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">マッチングアプリ</div>
+            <div class="user-menu">こんにちは、ユーザー様</div>
+        </header>
+        
+        <div class="app-container">
+            <div class="profiles-container" id="profiles-container">
+                <!-- プロフィールカードはJavaScriptで動的に生成されます -->
+            </div>
+            
+            <div class="nav-buttons">
+                <button id="view-matches-btn" class="nav-btn">マッチング一覧</button>
+            </div>
+            
+            <div class="messages-container" id="messages-screen" style="display: none;">
+                <div class="matches-list-container">
+                    <div class="matches-header">
+                        <div class="back-to-profiles" id="back-to-profiles">←</div>
+                        <div>マッチング一覧</div>
+                    </div>
+                    <ul class="matches-list" id="matches-list">
+                        <!-- マッチリストはJavaScriptで動的に生成されます -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chat-container" id="chat-container" style="display: none;">
+                <div class="chat-header">
+                    <div class="back-to-matches" id="back-to-matches">←</div>
+                    <div class="chat-with" id="chat-with"></div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <!-- メッセージはJavaScriptで動的に生成されます -->
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="メッセージを入力...">
+                    <button id="send-message">送信</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overlay" id="overlay"></div>
+        
+        <div class="match-notification" id="match-notification">
+            <h2>新しいマッチング！</h2>
+            <div id="matched-person"></div>
+            <div class="notification-buttons">
+                <button class="btn-message" id="btn-start-chat">メッセージを送る</button>
+                <button class="btn-continue" id="btn-continue-browsing">閲覧を続ける</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // プロフィールデータ
+        const profiles = [
+            {
+                id: 1,
+                name: "田中 彩", 
+                age: 28,
+                location: "東京",
+                job: "グラフィックデザイナー",
+                bio: "旅行と写真が好きです。新しい場所を探検するのが趣味です。週末はカフェ巡りをしていることが多いです。一緒に素敵な時間を過ごせる人を探しています。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 2,
+                name: "鈴木 健太",
+                age: 32,
+                location: "大阪",
+                job: "エンジニア",
+                bio: "音楽が大好きです。ギターを弾くことと料理が趣味です。最近はイタリアン料理に挑戦中。一緒にライブに行ける人や、お互いの料理を振る舞える関係を築きたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 3,
+                name: "佐藤 美咲",
+                age: 26,
+                location: "名古屋",
+                job: "ヨガインストラクター",
+                bio: "ヨガとランニングが好きです。健康的な生活を送っています。自然が好きで週末はよくハイキングに行きます。共通の趣味がある方とお話ししたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 4,
+                name: "伊藤 大輔",
+                age: 30,
+                location: "福岡",
+                job: "映画監督",
+                bio: "映画鑑賞と読書が趣味です。カフェでのんびり過ごすのが好きです。最近は脚本を書いています。一緒に映画について語り合える人を探しています。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 5,
+                name: "渡辺 優子",
+                age: 27,
+                location: "札幌",
+                job: "旅行ガイド",
+                bio: "アウトドア派です。登山とキャンプが大好きです。これまで15カ国を旅してきました。次はスカンジナビア諸国に行きたいと思っています。冒険好きな方と知り合いたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 6,
+                name: "中村 翔太",
+                age: 29,
+                location: "横浜",
+                job: "シェフ",
+                bio: "料理が大好きで、現在は地元のレストランでシェフをしています。休日は新しいレシピを試したり、食材探しに市場へ行くのが楽しみです。一緒に食べ歩きできる人を探しています。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 7,
+                name: "山田 愛",
+                age: 25,
+                location: "京都",
+                job: "書道家",
+                bio: "伝統文化に興味があり、書道と茶道を学んでいます。静かな環境で読書するのが好きです。京都の古い寺院や庭園をよく訪れます。穏やかな時間を共有できる方と出会いたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 8,
+                name: "小林 健",
+                age: 33,
+                location: "神戸",
+                job: "建築家",
+                bio: "建築とデザインが仕事であり趣味です。週末は美術館巡りをしたり、スケッチを描いたりしています。クリエイティブな会話ができる方と知り合いたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 9,
+                name: "加藤 美月",
+                age: 28,
+                location: "仙台",
+                job: "獣医",
+                bio: "動物が大好きで、犬2匹と猫1匹と暮らしています。休日は公園でジョギングしたり、動物保護施設でボランティアをしています。動物好きな方との出会いを楽しみにしています。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            },
+            {
+                id: 10,
+                name: "高橋 誠",
+                age: 31,
+                location: "広島",
+                job: "大学教授",
+                bio: "歴史学を教えています。本を読んだり、博物館に行くのが好きです。深い会話ができる知的な関係を求めています。一緒に歴史的な場所を訪れたり議論したりできる方と知り合いたいです。",
+                photo: "/api/placeholder/500/500" // プレースホルダー画像
+            }
+        ];
+        
+        // マッチリスト
+        let matches = [];
+        
+        // チャットメッセージ
+        let chats = {};
+        
+        // 現在表示中のプロフィールインデックス
+        let currentProfileIndex = 0;
+        
+        // 現在のチャット相手
+        let currentChatPartner = null;
+        
+        // DOMが読み込まれた後に実行
+        document.addEventListener('DOMContentLoaded', function() {
+            const profilesContainer = document.getElementById('profiles-container');
+            const matchesList = document.getElementById('matches-list');
+            const messagesScreen = document.getElementById('messages-screen');
+            const chatContainer = document.getElementById('chat-container');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatWith = document.getElementById('chat-with');
+            const messageInput = document.getElementById('message-input');
+            const sendMessage = document.getElementById('send-message');
+            const backToMatches = document.getElementById('back-to-matches');
+            const backToProfiles = document.getElementById('back-to-profiles');
+            const viewMatchesBtn = document.getElementById('view-matches-btn');
+            const matchNotification = document.getElementById('match-notification');
+            const matchedPerson = document.getElementById('matched-person');
+            const btnStartChat = document.getElementById('btn-start-chat');
+            const btnContinueBrowsing = document.getElementById('btn-continue-browsing');
+            const overlay = document.getElementById('overlay');
+            
+            // プロフィールカードを生成
+            function createProfileCards() {
+                profilesContainer.innerHTML = '';
+                
+                profiles.forEach((profile, index) => {
+                    const profileCard = document.createElement('div');
+                    profileCard.className = 'profile-card';
+                    profileCard.style.transform = `translateX(${(index - currentProfileIndex) * 100}%)`;
+                    
+                    profileCard.innerHTML = `
+                        <div class="profile-photo">
+                            <img src="${profile.photo}" alt="${profile.name}">
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name">${profile.name}</div>
+                            <div class="profile-age">${profile.age}歳</div>
+                            <div class="profile-location">${profile.location}</div>
+                            <div class="profile-job">${profile.job}</div>
+                            <div class="profile-bio">${profile.bio}</div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-dislike" data-index="${index}">✗</button>
+                            <button class="btn btn-like" data-index="${index}">♥</button>
+                        </div>
+                    `;
+                    
+                    profilesContainer.appendChild(profileCard);
+                });
+                
+                // いいね/スキップボタンにイベントリスナーを追加
+                document.querySelectorAll('.btn-like').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        likeProfile(index);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-dislike').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        dislikeProfile(index);
+                    });
+                });
+            }
+            
+            // プロフィールをいいね
+            function likeProfile(index) {
+                // 50%の確率でマッチングする
+                const isMatch = Math.random() > 0.5;
+                
+                if (isMatch) {
+                    // マッチング成立
+                    matches.push(profiles[index]);
+                    
+                    // チャット初期化
+                    chats[profiles[index].id] = [];
+                    
+                    // マッチリストを更新
+                    updateMatchesList();
+                    
+                    // マッチ通知を表示
+                    showMatchNotification(profiles[index]);
+                } else {
+                    // マッチングなし、次のプロフィールへ
+                    nextProfile();
+                }
+            }
+            
+            // プロフィールをスキップ
+            function dislikeProfile(index) {
+                nextProfile();
+            }
+            
+            // 次のプロフィールを表示
+            function nextProfile() {
+                if (currentProfileIndex < profiles.length - 1) {
+                    currentProfileIndex++;
+                    updateProfileCards();
+                } else {
+                    // 全てのプロフィールを表示した場合
+                    alert('すべてのプロフィールを見ました。');
+                }
+            }
+            
+            // プロフィールカードを更新
+            function updateProfileCards() {
+                document.querySelectorAll('.profile-card').forEach((card, index) => {
+                    card.style.transform = `translateX(${(index - currentProfileIndex) * 100}%)`;
+                });
+            }
+            
+            // マッチリストを更新
+            function updateMatchesList() {
+                matchesList.innerHTML = '';
+                
+                if (matches.length === 0) {
+                    const emptyItem = document.createElement('li');
+                    emptyItem.textContent = 'まだマッチングがありません';
+                    emptyItem.className = 'match-item empty';
+                    matchesList.appendChild(emptyItem);
+                    return;
+                }
+                
+                matches.forEach(match => {
+                    const matchItem = document.createElement('li');
+                    matchItem.className = 'match-item';
+                    matchItem.dataset.id = match.id;
+                    
+                    matchItem.innerHTML = `
+                        <div class="match-avatar">
+                            <img src="${match.photo}" alt="${match.name}">
+                        </div>
+                        <div class="match-name">${match.name}</div>
+                    `;
+                    
+                    matchItem.addEventListener('click', function() {
+                        openChat(match);
+                    });
+                    
+                    matchesList.appendChild(matchItem);
+                });
+            }
+            
+            // マッチ通知を表示
+            function showMatchNotification(profile) {
+                matchedPerson.textContent = `${profile.name}さんとマッチングしました！`;
+                matchNotification.style.display = 'block';
+                overlay.style.display = 'block';
+                
+                btnStartChat.onclick = function() {
+                    hideMatchNotification();
+                    // まずメッセージ画面を表示してからチャットを開く
+                    messagesScreen.style.display = 'flex';
+                    setTimeout(() => {
+                        openChat(profile);
+                    }, 100);
+                };
+                
+                btnContinueBrowsing.onclick = function() {
+                    hideMatchNotification();
+                    nextProfile();
+                };
+            }
+            
+            // マッチ通知を非表示
+            function hideMatchNotification() {
+                matchNotification.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+            
+            // チャットを開く
+            function openChat(profile) {
+                currentChatPartner = profile;
+                chatWith.textContent = `${profile.name}さんとチャット中`;
+                
+                // マッチリスト画面を非表示、チャットを表示
+                messagesScreen.style.display = 'none';
+                chatContainer.style.display = 'flex';
+                
+                // チャットメッセージを表示
+                updateChatMessages();
+                
+                // アクティブなマッチを強調表示
+                document.querySelectorAll('.match-item').forEach(item => {
+                    if (parseInt(item.dataset.id) === profile.id) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // マッチリストに戻る
+            backToMatches.addEventListener('click', function() {
+                chatContainer.style.display = 'none';
+                messagesScreen.style.display = 'flex';
+                currentChatPartner = null;
+                
+                // アクティブな状態を解除
+                document.querySelectorAll('.match-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+            });
+            
+            // プロフィール画面に戻る
+            backToProfiles.addEventListener('click', function() {
+                messagesScreen.style.display = 'none';
+            });
+            
+            // マッチング一覧を表示
+            viewMatchesBtn.addEventListener('click', function() {
+                messagesScreen.style.display = 'flex';
+                updateMatchesList();
+            });
+            
+            // メッセージを送信
+            sendMessage.addEventListener('click', function() {
+                sendNewMessage();
+            });
+            
+            // Enterキーでもメッセージを送信
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendNewMessage();
+                }
+            });
+            
+            // 新しいメッセージを送信
+            function sendNewMessage() {
+                const messageText = messageInput.value.trim();
+                
+                if (messageText && currentChatPartner) {
+                    // メッセージを追加
+                    const newMessage = {
+                        sender: 'user',
+                        text: messageText,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    chats[currentChatPartner.id].push(newMessage);
+                    
+                    // メッセージ入力欄をクリア
+                    messageInput.value = '';
+                    
+                    // チャットを更新
+                    updateChatMessages();
+                    
+                    // 自動返信 (デモ用)
+                    setTimeout(() => {
+                        const replyMessage = {
+                            sender: 'match',
+                            text: getAutoReply(),
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        chats[currentChatPartner.id].push(replyMessage);
+                        updateChatMessages();
+                    }, 1000);
+                }
+            }
+            
+            // チャットメッセージを更新
+            function updateChatMessages() {
+                if (!currentChatPartner) return;
+                
+                chatMessages.innerHTML = '';
+                
+                const messages = chats[currentChatPartner.id];
+                
+                if (messages.length === 0) {
+                    showEmptyChatMessage();
+                    return;
+                }
+                
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = msg.sender === 'user' ? 'message message-sent' : 'message message-received';
+                    messageDiv.textContent = msg.text;
+                    chatMessages.appendChild(messageDiv);
+                });
+                
+                // 最新のメッセージまでスクロール
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // 自動返信メッセージを取得 (デモ用)
+            function getAutoReply() {
+                const replies = [
+                    "こんにちは！メッセージありがとう。",
+                    "素敵なプロフィールですね。",
+                    "今週末は何か予定ありますか？",
+                    "その話面白いですね！もっと教えてください。",
+                    "私も同じ趣味を持っています！",
+                    "はじめまして！よろしくお願いします。",
+                    "それは興味深いですね。",
+                    "ありがとう！あなたのことももっと知りたいです。"
+                ];
+                
+                return replies[Math.floor(Math.random() * replies.length)];
+            }
+            
+            // メッセージが空のときのUI改善
+            function showEmptyChatMessage() {
+                chatMessages.innerHTML = '';
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-chat';
+                emptyMessage.textContent = 'メッセージを送ってみましょう！';
+                emptyMessage.style.textAlign = 'center';
+                emptyMessage.style.margin = '20px';
+                emptyMessage.style.color = '#888';
+                chatMessages.appendChild(emptyMessage);
+            }
+
+            // 初期化
+            createProfileCards();
+            updateMatchesList();
+        });
+    </script>
+</body>
+</html>
